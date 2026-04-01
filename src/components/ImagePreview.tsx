@@ -68,10 +68,10 @@ export default function ImagePreview({
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
-      alert('已复制到剪贴板！');
+      alert('Copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy:', err);
-      alert('复制失败，请尝试下载');
+      alert('Copy failed, please try downloading instead');
     }
   };
 
@@ -122,16 +122,16 @@ export default function ImagePreview({
 
         {/* Labels */}
         <div className="absolute top-4 left-4 px-3 py-1 bg-black/50 text-white text-sm rounded-full">
-          原图
+          Original
         </div>
         <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 text-white text-sm rounded-full">
-          无背景
+          No Background
         </div>
       </div>
 
       {/* Slider Hint */}
       <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-        👆 拖动滑块对比原图和结果
+        👆 Drag slider to compare before and after
       </p>
 
       {/* Action Buttons */}
@@ -141,19 +141,19 @@ export default function ImagePreview({
           className="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
         >
           <span>⬇️</span>
-          <span>下载 PNG</span>
+          <span>Download PNG</span>
         </button>
         <button
           onClick={copyToClipboard}
           className="w-full sm:w-auto px-8 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
         >
           <span>📋</span>
-          <span>复制图片</span>
+          <span>Copy Image</span>
         </button>
       </div>
 
       <p className="text-center text-green-600 dark:text-green-400 font-medium">
-        ✨ 图片已处理完成！直接下载使用
+        ✨ Image processed! Download and use it now
       </p>
     </div>
   );

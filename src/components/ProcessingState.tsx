@@ -34,7 +34,7 @@ export default function ProcessingState({ onCancel }: ProcessingStateProps) {
 
       <div className="space-y-2">
         <p className="text-xl font-medium text-gray-700 dark:text-gray-200">
-          正在移除背景{dots}
+          Removing background{dots}
         </p>
       </div>
 
@@ -46,14 +46,14 @@ export default function ProcessingState({ onCancel }: ProcessingStateProps) {
       </div>
 
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        预计剩余 {Math.max(1, Math.ceil((100 - progress) / 30))} 秒
+        Estimated time: {Math.max(1, Math.ceil((100 - progress) / 30))} seconds
       </p>
 
       <button
         onClick={onCancel}
         className="px-6 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
       >
-        取消
+        Cancel
       </button>
     </div>
   );

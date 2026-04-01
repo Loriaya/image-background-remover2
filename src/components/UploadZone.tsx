@@ -17,14 +17,14 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
     // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      setError('请上传 JPG、PNG 或 WebP 格式');
+      setError('Please upload JPG, PNG or WebP format');
       return false;
     }
 
     // Validate file size (10MB)
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      setError('文件大小请控制在10MB以内');
+      setError('File size must be under 10MB');
       return false;
     }
 
@@ -104,19 +104,19 @@ export default function UploadZone({ onFileSelect, isProcessing }: UploadZonePro
         {isProcessing ? (
           <div className="space-y-4">
             <div className="text-5xl animate-pulse">⚡</div>
-            <p className="text-gray-500 dark:text-gray-400">处理中...</p>
+            <p className="text-gray-500 dark:text-gray-400">Processing...</p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="text-6xl">📤</div>
             <div>
               <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
-                拖拽图片到这里
+                Drop your image here
               </p>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">或点击上传</p>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">or click to upload</p>
             </div>
             <p className="text-sm text-gray-400 dark:text-gray-500">
-              支持 JPG, PNG, WebP · 最大 10MB
+              Supports JPG, PNG, WebP · Max 10MB
             </p>
           </div>
         )}
