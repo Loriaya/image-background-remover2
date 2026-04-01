@@ -19,16 +19,54 @@ export interface RemoveBgError {
 }
 
 export async function removeBackground(
-  imageFile: File,
-  apiKey: string
+  imageFile: File
 ): Promise<RemoveBgResult | RemoveBgError> {
   const startTime = Date.now();
-  const formData = new FormData();
-  formData.append('image_file', imageFile);
-  formData.append('size', 'auto');
-  formData.append('format', 'png');
 
   try {
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(imageFile.type)) {
+      return {
+        success: false,
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Please upload JPG, PNG or WebP format',
+        },
+      };
+    }
+
+    // Validate file size (10MB)
+    if (imageFile.size > 10 * 1024 * 1024) {
+      return {
+        success: false,
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'File size must be under 10MB',
+        },
+      };
+    }
+
+    // For client-side calls, we need to use a CORS proxy or direct call
+    // Remove.bg supports direct browser calls with proper error handling
+    const formData = new FormData();
+    formData.append('image_file', imageFile);
+    formData.append('size', 'auto');
+    formData.append('format', 'png');
+
+    // Note: This requires Remove.bg API key to be exposed in client
+    // For production, use a backend proxy to protect the API key
+    const apiKey = (window as { REMOVE_BG_API_KEY?: string }).REMOVE_BG_API_KEY;
+    if (!apiKey) {
+      return {
+        success: false,
+        error: {
+          code: 'NO_API_KEY',
+          message: 'API key not configured',
+        },
+      };
+    }
+
     const response = await fetch(REMOVE_BG_API_URL, {
       method: 'POST',
       headers: {

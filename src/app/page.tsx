@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import UploadZone from '@/components/UploadZone';
 import ImagePreview from '@/components/ImagePreview';
 import ProcessingState from '@/components/ProcessingState';
+import { removeBackground } from '@/lib/remove-bg';
 
 type ProcessingStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
 
@@ -18,6 +19,9 @@ interface ErrorInfo {
   code: string;
   message: string;
 }
+
+// API key will be injected at build time via environment variable
+const API_KEY = process.env.NEXT_PUBLIC_REMOVE_BG_API_KEY || '';
 
 export default function Home() {
   const [status, setStatus] = useState<ProcessingStatus>('idle');
@@ -40,37 +44,25 @@ export default function Home() {
     setStatus('processing');
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
+      // Set API key globally for the removeBg function
+      (window as { REMOVE_BG_API_KEY?: string }).REMOVE_BG_API_KEY = API_KEY;
 
-      abortControllerRef.current = new AbortController();
+      const response = await removeBackground(file);
 
-      const response = await fetch('/api/remove-bg', {
-        method: 'POST',
-        body: formData,
-        signal: abortControllerRef.current.signal,
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setResult(data.data);
+      if (response.success) {
+        setResult(response.data);
         setStatus('done');
       } else {
-        setError(data.error);
+        setError(response.error);
         setStatus('error');
       }
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        setStatus('idle');
-      } else {
-        console.error('Processing error:', err);
-        setError({
-          code: 'PROCESSING_FAILED',
-          message: '处理失败，请稍后重试',
-        });
-        setStatus('error');
-      }
+      console.error('Processing error:', err);
+      setError({
+        code: 'PROCESSING_FAILED',
+        message: 'Processing failed, please try again',
+      });
+      setStatus('error');
     }
   }, []);
 
@@ -102,7 +94,7 @@ export default function Home() {
       <header className="border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🦞</span>
+            <span className="text-2xl">🦐</span>
             <span className="font-bold text-xl">ImageBG</span>
           </div>
           <nav className="flex items-center gap-4 text-sm">
