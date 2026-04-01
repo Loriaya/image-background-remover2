@@ -1,4 +1,4 @@
-const API_URL = '/api/remove-bg';
+const REMOVE_BG_API_URL = 'https://api.remove.bg/v1.0/removebg';
 
 export interface RemoveBgResult {
   success: true;
@@ -48,10 +48,15 @@ export async function removeBackground(
     }
 
     const formData = new FormData();
-    formData.append('image', imageFile);
+    formData.append('image_file', imageFile);
+    formData.append('size', 'auto');
+    formData.append('format', 'png');
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(REMOVE_BG_API_URL, {
       method: 'POST',
+      headers: {
+        'X-Api-Key': 'RQXUrCGPQv3HFswmXjDCsdFL',
+      },
       body: formData,
     });
 
@@ -62,28 +67,24 @@ export async function removeBackground(
       return {
         success: false,
         error: {
-          code: errorData.error?.code || 'API_ERROR',
-          message: errorData.error?.message || 'Remove.bg API error',
+          code: errorData.errors?.[0]?.code || 'API_ERROR',
+          message: errorData.errors?.[0]?.title || 'Remove.bg API error',
         },
       };
     }
 
-    const data = await response.json();
+    const blob = await response.blob();
+    const resultUrl = URL.createObjectURL(blob);
 
-    if (data.success) {
-      return {
-        success: true,
-        data: {
-          ...data.data,
-          processingTime,
-        },
-      };
-    } else {
-      return {
-        success: false,
-        error: data.error,
-      };
-    }
+    return {
+      success: true,
+      data: {
+        resultUrl,
+        originalSize: imageFile.size,
+        processedSize: blob.size,
+        processingTime,
+      },
+    };
   } catch (error) {
     return {
       success: false,
