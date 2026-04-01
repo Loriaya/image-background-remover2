@@ -1,4 +1,4 @@
-const REMOVE_BG_API_URL = 'https://api.remove.bg/v1.0/removebg';
+const API_URL = '/api/remove-bg';
 
 export interface RemoveBgResult {
   success: true;
@@ -47,31 +47,11 @@ export async function removeBackground(
       };
     }
 
-    // For client-side calls, we need to use a CORS proxy or direct call
-    // Remove.bg supports direct browser calls with proper error handling
     const formData = new FormData();
-    formData.append('image_file', imageFile);
-    formData.append('size', 'auto');
-    formData.append('format', 'png');
+    formData.append('image', imageFile);
 
-    // Note: This requires Remove.bg API key to be exposed in client
-    // For production, use a backend proxy to protect the API key
-    const apiKey = (window as { REMOVE_BG_API_KEY?: string }).REMOVE_BG_API_KEY;
-    if (!apiKey) {
-      return {
-        success: false,
-        error: {
-          code: 'NO_API_KEY',
-          message: 'API key not configured',
-        },
-      };
-    }
-
-    const response = await fetch(REMOVE_BG_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'X-Api-Key': apiKey,
-      },
       body: formData,
     });
 
@@ -82,24 +62,28 @@ export async function removeBackground(
       return {
         success: false,
         error: {
-          code: errorData.errors?.[0]?.code || 'API_ERROR',
-          message: errorData.errors?.[0]?.title || 'Remove.bg API error',
+          code: errorData.error?.code || 'API_ERROR',
+          message: errorData.error?.message || 'Remove.bg API error',
         },
       };
     }
 
-    const blob = await response.blob();
-    const resultUrl = URL.createObjectURL(blob);
+    const data = await response.json();
 
-    return {
-      success: true,
-      data: {
-        resultUrl,
-        originalSize: imageFile.size,
-        processedSize: blob.size,
-        processingTime,
-      },
-    };
+    if (data.success) {
+      return {
+        success: true,
+        data: {
+          ...data.data,
+          processingTime,
+        },
+      };
+    } else {
+      return {
+        success: false,
+        error: data.error,
+      };
+    }
   } catch (error) {
     return {
       success: false,

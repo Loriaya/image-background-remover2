@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import UploadZone from '@/components/UploadZone';
 import ImagePreview from '@/components/ImagePreview';
 import ProcessingState from '@/components/ProcessingState';
@@ -20,16 +20,12 @@ interface ErrorInfo {
   message: string;
 }
 
-// API key will be injected at build time via environment variable
-const API_KEY = process.env.NEXT_PUBLIC_REMOVE_BG_API_KEY || '';
-
 export default function Home() {
   const [status, setStatus] = useState<ProcessingStatus>('idle');
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [originalUrl, setOriginalUrl] = useState<string>('');
   const [result, setResult] = useState<ProcessingResult | null>(null);
   const [error, setError] = useState<ErrorInfo | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleFileSelect = useCallback(async (file: File) => {
     setStatus('uploading');
@@ -37,16 +33,12 @@ export default function Home() {
     setResult(null);
     setOriginalFile(file);
 
-    // Create URL for original image preview
     const originalImageUrl = URL.createObjectURL(file);
     setOriginalUrl(originalImageUrl);
 
     setStatus('processing');
 
     try {
-      // Set API key globally for the removeBg function
-      (window as { REMOVE_BG_API_KEY?: string }).REMOVE_BG_API_KEY = API_KEY;
-
       const response = await removeBackground(file);
 
       if (response.success) {
@@ -67,9 +59,6 @@ export default function Home() {
   }, []);
 
   const handleCancel = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
     setStatus('idle');
     setOriginalFile(null);
     setOriginalUrl('');
